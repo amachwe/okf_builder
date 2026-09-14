@@ -35,10 +35,19 @@ def _resolve_path(path: str) -> str:
 
 
 def write_file(path: str, name: str, content: str) -> str:
-    """
-    path: string representation of the location path - must be different from filename. Path must end in /
-    name: string name of the file
-    content: string content to write to the file
+    """Write text content to a file, creating the directory if needed.
+
+    Overwrites the file if it already exists.
+
+    Args:
+        path: Location of the file relative to the configured path-root.
+            Must end in "/" and must not include the filename itself.
+        name: Name of the file to write (e.g. "notes.md").
+        content: Text content to write to the file.
+
+    Returns:
+        A message confirming the file was written, or an error message if
+        the write failed.
     """
     directory = _resolve_path(path)
     full_path = os.path.join(directory, name)
@@ -52,9 +61,16 @@ def write_file(path: str, name: str, content: str) -> str:
 
 
 def read_file(path: str, name: str) -> str:
-    """
-    path: string representation of the location path - must be different from filename. Path must end in /
-    name: string name of the file
+    """Read and return the text content of a file.
+
+    Args:
+        path: Location of the file relative to the configured path-root.
+            Must end in "/" and must not include the filename itself.
+        name: Name of the file to read (e.g. "notes.md").
+
+    Returns:
+        The file's text content, or a message describing why it could not
+        be read (not found, or an I/O error).
     """
     full_path = os.path.join(_resolve_path(path), name)
     if not os.path.exists(full_path):
@@ -67,8 +83,15 @@ def read_file(path: str, name: str) -> str:
 
 
 def read_directory(path: str) -> str:
-    """
-    path: string representation of the location path - must be different from filename. Path must end in /
+    """List the names of files and subdirectories at a path.
+
+    Args:
+        path: Location to list, relative to the configured path-root. Must
+            end in "/".
+
+    Returns:
+        Newline-separated entry names, or a message if the path does not
+        exist or could not be read.
     """
     full_path = _resolve_path(path)
     if not os.path.exists(full_path):
@@ -80,9 +103,16 @@ def read_directory(path: str) -> str:
 
 
 def remove_file(path: str, name: str) -> str:
-    """
-    path: string representation of the location path - must be different from filename. Path must end in /
-    name: string name of the file
+    """Delete a file. This cannot be undone.
+
+    Args:
+        path: Location of the file relative to the configured path-root.
+            Must end in "/" and must not include the filename itself.
+        name: Name of the file to remove (e.g. "notes.md").
+
+    Returns:
+        A message confirming the removal, or an error message if the file
+        was not found or could not be removed.
     """
     full_path = os.path.join(_resolve_path(path), name)
     if not os.path.exists(full_path):
@@ -108,8 +138,19 @@ def _fetch_page_text(url: str) -> str:
 
 
 def search(query: str) -> str:
-    """
-    query: string to search for.
+    """Search the web via Tavily and return content from .edu/Wikipedia hits.
+
+    Runs an advanced Tavily search, keeps only results whose URL contains
+    "edu" or "wikipedia", and for each one fetches the live page text
+    (falling back to Tavily's own snippet if the fetch fails).
+
+    Args:
+        query: The search query.
+
+    Returns:
+        Concatenated "URL: ...\\nContent: ..." blocks for each matching
+        result, "No results" if none matched, or an error message if the
+        Tavily request itself failed (e.g. missing API key).
     """
     api_key = os.environ.get(TAVILY_API_KEY_ENV_VAR)
     if not api_key:
