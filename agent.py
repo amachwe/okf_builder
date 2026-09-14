@@ -14,8 +14,14 @@ import yaml
 from bs4 import BeautifulSoup
 from tavily import TavilyClient
 
-MODEL = "ollama_chat/gemma4:12b"
+USE_LITE_LLM = True
+
+MODEL_GEMMA4 = "ollama_chat/gemma4:12b"
+MODEL_OPENAI = "gpt-5.6-terra"
+MODEL = MODEL_OPENAI
+
 TAVILY_API_KEY_ENV_VAR = "TAVILY_API_KEY"
+
 FETCH_TIMEOUT_SECONDS = 10
 MAX_PAGE_CHARS = 4000
 
@@ -25,7 +31,11 @@ with open("config.yaml", "r") as f:
 with open("prompt.yaml", "r") as f:
     prompt = yaml.safe_load(f)
 
-model = llm.LiteLlm(model=MODEL)
+model = MODEL
+if USE_LITE_LLM:
+    model = llm.LiteLlm(model=MODEL)
+
+# Instruction assembly
 instruction = prompt["skills"] + "\nFollow user instructions."
 
 
